@@ -1,0 +1,11 @@
+[package]
+name = "shieldvote-cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+base64 = "0.21"
+sha2 = "0.10"
+rand = "0.8"
+hex = "0.4"
+
