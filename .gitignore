@@ -1,0 +1,100 @@
+# Rust build artifacts
+target/
+**/target/
+
+# Node dependencies  
+node_modules/
+**/node_modules/
+
+# Anchor build artifacts
+app/.next/
+app/.vercel/
+.DS_Store
+*.log
+
+# IDE/editor config
+.vscode/
+.idea/
+
+# Build and cache directories
+.anchor/
+test-ledger/
+.cache/
+dist/
+build/
+
+# Rust-specific build files
+*.rlib
+*.rmeta
+*.d
+*.so
+*.dll
+*.dylib
+*.exe
+*.pdb
+*.exp
+.rustc_info.json
+
+# Fingerprint directories and files
+**/.fingerprint/
+**/fingerprint/
+*.fingerprint
+
+# Build script outputs
+**/build/*/output
+**/build/*/root-output
+**/build/*/out
+**/build/*/stderr
+**/build/*/stdout
+
+# Dependency files
+**/deps/
+**/*-deps
+dep-*
+
+# Incremental compilation
+**/incremental/
+
+# Additional Rust build artifacts
+**/release/
+**/debug/
+**/rust-analyzer/
+
+# Generated keypairs and deployment artifacts
+*-keypair.json
+deploy/*.json
+target/**/*.json
+.anchor/**/*.json
+
+# Keep important config files (whitelist approach)
+!package.json
+!tsconfig.json
+!Anchor.toml
+!Cargo.toml
+!my-keypair.json
+
+# Lock files
+yarn.lock
+package-lock.json
+Cargo.lock
+
+# Logs and temporary files
+*.tmp
+*.temp
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+!.env.example

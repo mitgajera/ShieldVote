@@ -1,0 +1,9 @@
+[programs.devnet]
+shieldvote_anchor = "FNbsp7QAZe7gRu3osyVSn2ZmrGWCXJoe9X83STVngzMc"  # Replace after deployment
+
+[provider]
+cluster = "devnet"
+wallet = "D:\\Wd\\w3\\my-wallet\\my-keypair.json"
+
+[scripts]
+test = "mocha"

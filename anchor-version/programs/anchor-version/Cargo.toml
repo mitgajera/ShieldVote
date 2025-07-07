@@ -1,0 +1,15 @@
+[package]
+name = "shieldvote_anchor"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "shieldvote_anchor"
+crate-type = ["cdylib", "lib"]
+
+[features]
+no-entrypoint = []
+default = []
+
+[dependencies]
+anchor-lang = "0.29.0"
