@@ -1,12 +1,58 @@
-use std::collections::HashMap;
-use std::io::{self, Write};
-use sha2::{Sha256, Digest};
+use anchor_client::solana_sdk::{
+    pubkey::Pubkey,
+    signature::{Keypair, Signer, read_keypair_file},
+    system_program,
+};
+use anchor_client::{Client, Cluster, Program};
+use solana_sdk::commitment_config::CommitmentConfig;
+use anyhow::Result;
+use clap::{Parser, Subcommand};
 use rand::Rng;
+use sha2::{Sha256, Digest};
+use std::rc::Rc;
+use std::str::FromStr;
 
-#[derive(Debug)]
-struct Proposal {
-    title: String,
-    votes: Vec<String>, // Stores hashed commitments
+use shieldvote_anchor::instruction;
+use shieldvote_anchor::accounts;
+
+#[derive(Parser)]
+#[command(name = "ShieldVote CLI")]
+#[command(about = "Confidential DAO voting system")]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Create {
+        #[arg(long)]
+        title: String,
+        #[arg(long)]
+        commit_deadline: i64,
+        #[arg(long)]
+        reveal_deadline: i64,
+    },
+    Commit {
+        #[arg(long)]
+        proposal: String,
+        #[arg(long)]
+        vote: String,
+    },
+    Reveal {
+        #[arg(long)]
+        proposal: String,
+        #[arg(long)]
+        vote: String,
+        #[arg(long)]
+        salt: String,
+    },
+}
+
+fn get_program(wallet: &Keypair, program_id: &Pubkey) -> Program<Rc<Keypair>> {
+    let wallet_clone = Keypair::from_bytes(&wallet.to_bytes()).unwrap();
+    let client = Client::new_with_options(Cluster::Devnet, Rc::new(wallet_clone), CommitmentConfig::processed());
+    client.program(*program_id).unwrap()
 }
 
 fn hash_vote(vote: &str, salt: &str) -> String {
@@ -17,93 +63,71 @@ fn hash_vote(vote: &str, salt: &str) -> String {
     hex::encode(result)
 }
 
-fn main() {
-    let mut proposals: HashMap<String, Proposal> = HashMap::new();
+fn main() -> Result<()> {
+    let cli = Cli::parse();
 
-    println!("🛡️ ShieldVote CLI - Simulate Confidential DAO Voting\n");
+    // ✅ Use the official keypair loader from Solana SDK
+    let payer = read_keypair_file("D:\\Wd\\w3\\my-wallet\\my-keypair.json")
+        .expect("Failed to read keypair file");
 
-    loop {
-        println!("Select an option:\n1. Create Proposal\n2. Commit Vote\n3. Exit");
+    let program_id = Pubkey::from_str("FNbsp7QAZe7gRu3osyVSn2ZmrGWCXJoe9X83STVngzMc")?;
+    let program = get_program(&payer, &program_id);
 
-        let mut option = String::new();
-        io::stdin().read_line(&mut option).unwrap();
+    match cli.command {
+        Commands::Create { title, commit_deadline, reveal_deadline } => {
+            let proposal = Keypair::new();
 
-        match option.trim() {
-            "1" => {
-                print!("Enter proposal title: ");
-                io::stdout().flush().unwrap();
+            program
+                .request()
+                .accounts(accounts::CreateProposal {
+                    proposal: proposal.pubkey(),
+                    creator: payer.pubkey(),
+                    system_program: system_program::ID,
+                })
+                .args(instruction::CreateProposal {
+                    title,
+                    deadline_commit: commit_deadline,
+                    deadline_reveal: reveal_deadline,
+                })
+                .signer(&proposal)
+                .send()?;
 
-                let mut title = String::new();
-                io::stdin().read_line(&mut title).unwrap();
-                let title = title.trim().to_string();
+            println!("✅ Proposal created: {}", proposal.pubkey());
+        }
 
-                proposals.insert(
-                    title.clone(),
-                    Proposal {
-                        title,
-                        votes: Vec::new(),
-                    },
-                );
+        Commands::Commit { proposal, vote } => {
+            let proposal = Pubkey::from_str(&proposal)?;
+            let salt: u64 = rand::thread_rng().gen();
+            let salt_str = salt.to_string();
+            let commitment = hash_vote(&vote, &salt_str);
 
-                println!("✅ Proposal created.\n");
-            }
+            println!("🔐 Vote committed. Save this:");
+            println!("   Salt: {}", salt_str);
+            println!("   Commitment: {}", commitment);
 
-            "2" => {
-                if proposals.is_empty() {
-                    println!("⚠️ No proposals available. Create one first.\n");
-                    continue;
-                }
+            program
+                .request()
+                .accounts(accounts::CommitVote {
+                    proposal,
+                    voter: payer.pubkey(),
+                })
+                .args(instruction::CommitVote { commitment })
+                .send()?;
+        }
 
-                println!("Available proposals:");
-                for (i, title) in proposals.keys().enumerate() {
-                    println!("{}: {}", i + 1, title);
-                }
+        Commands::Reveal { proposal, vote, salt } => {
+            let proposal = Pubkey::from_str(&proposal)?;
 
-                print!("Enter proposal number: ");
-                io::stdout().flush().unwrap();
-                let mut num = String::new();
-                io::stdin().read_line(&mut num).unwrap();
-                let num: usize = match num.trim().parse() {
-                    Ok(n) => n,
-                    Err(_) => {
-                        println!("❌ Invalid number.\n");
-                        continue;
-                    }
-                };
-
-                let selected_title = match proposals.keys().nth(num - 1) {
-                    Some(t) => t.clone(),
-                    None => {
-                        println!("❌ Invalid selection.\n");
-                        continue;
-                    }
-                };
-
-                print!("Enter your vote (e.g., yes/no): ");
-                io::stdout().flush().unwrap();
-                let mut vote = String::new();
-                io::stdin().read_line(&mut vote).unwrap();
-                let vote = vote.trim();
-
-                let salt: u64 = rand::thread_rng().gen();
-                let salt_str = salt.to_string();
-                let commitment = hash_vote(vote, &salt_str);
-
-                println!("🔐 Your vote has been hashed and committed.");
-                println!("🧂 Salt: {}", salt_str);
-                println!("📦 Commitment (hash): {}\n", commitment);
-
-                if let Some(proposal) = proposals.get_mut(&selected_title) {
-                    proposal.votes.push(commitment);
-                }
-            }
-
-            "3" => {
-                println!("👋 Exiting ShieldVote CLI. Goodbye!");
-                break;
-            }
-
-            _ => println!("❌ Invalid option.\n"),
+            program
+                .request()
+                .accounts(accounts::RevealVote {
+                    proposal,
+                    voter: payer.pubkey(),
+                })
+                .args(instruction::RevealVote { vote, salt })
+                .send()?;
         }
     }
+
+    Ok(())
 }
