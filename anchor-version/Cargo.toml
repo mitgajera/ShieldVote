@@ -1,2 +1,3 @@
 [workspace]
-members = ["programs/shieldvote_anchor"]
+members = ["programs/anchor-version"]
+resolver = "2"
