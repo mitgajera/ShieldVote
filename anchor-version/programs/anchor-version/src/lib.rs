@@ -22,11 +22,9 @@ pub mod shieldvote_anchor {
         proposal.commitment_count = 0;
         proposal.reveal_count = 0;
 
-        // Initialize arrays with default values
-        for i in 0..MAX_VOTES as usize {
-            proposal.commitments[i] = Commitment::default();
-            proposal.reveals[i] = Reveal::default();
-        }
+        // ✅ Fixed: initialize arrays using from_fn to avoid Copy requirement
+        proposal.commitments = core::array::from_fn(|_| Commitment::default());
+        proposal.reveals = core::array::from_fn(|_| Reveal::default());
 
         Ok(())
     }
@@ -65,10 +63,7 @@ pub mod shieldvote_anchor {
             CustomError::NotRevealPhase
         );
 
-        require!(
-            proposal.reveal_count < MAX_VOTES,
-            CustomError::TooManyVotes
-        );
+        require!(proposal.reveal_count < MAX_VOTES, CustomError::TooManyVotes);
 
         let index = proposal.reveal_count as usize;
         proposal.reveals[index] = Reveal {
@@ -132,8 +127,7 @@ pub struct Reveal {
 
 impl Proposal {
     // Conservative calculation with extra buffer for serialization
-    pub const SIZE: usize = 
-        32 +                        // creator
+    pub const SIZE: usize = 32 +                        // creator
         4 + 64 +                    // title (reduced size)
         8 +                         // deadline_commit
         8 +                         // deadline_reveal
@@ -141,7 +135,7 @@ impl Proposal {
         4 +                         // reveal_count
         (32 + 4 + 64) * 5 +         // commitments array (5 entries, 64 bytes per string)
         (32 + 4 + 32 + 4 + 32) * 5 + // reveals array (5 entries, 32 bytes per string)
-        200;                        // Extra buffer for Borsh serialization
+        200; // Extra buffer for Borsh serialization
 }
 
 #[error_code]
