@@ -3,7 +3,7 @@ shieldvote_anchor = "FNbsp7QAZe7gRu3osyVSn2ZmrGWCXJoe9X83STVngzMc"  # Replace af
 
 [provider]
 cluster = "devnet"
-wallet = "D:\\Wd\\w3\\my-wallet\\my-keypair.json"
+wallet = "D:\\Wd\\w3\\my-wallet\\my-keypair.json" # Repace with your path
 
 [scripts]
 test = "mocha"

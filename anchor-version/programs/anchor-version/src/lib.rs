@@ -21,13 +21,13 @@ pub mod shieldvote_anchor {
         proposal.deadline_reveal = deadline_reveal;
         proposal.commitment_count = 0;
         proposal.reveal_count = 0;
-        
+
         // Initialize arrays with default values
         for i in 0..MAX_VOTES as usize {
             proposal.commitments[i] = Commitment::default();
             proposal.reveals[i] = Reveal::default();
         }
-        
+
         Ok(())
     }
 
