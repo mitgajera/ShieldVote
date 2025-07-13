@@ -1,12 +1,12 @@
-# 🛡️ ShieldVote - Confidential DAO Voting with Commitment Schemes
+# 🛡️ ShieldVoteX - Confidential DAO Voting with Commitment Schemes
 
-ShieldVote is a Solana-based confidential voting system that enables anonymous and tamper-resistant DAO voting using commitment schemes. Built with Anchor, this project brings secure, verifiable, and privacy-preserving governance to decentralized communities.
+ShieldVoteX is a Solana-based confidential voting system that enables anonymous and tamper-resistant DAO voting using commitment schemes. Built with Anchor, this project brings secure, verifiable, and privacy-preserving governance to decentralized communities.
 
 ---
 
-## ✨ Why ShieldVote?
+## ✨ Why ShieldVoteX?
 
-Most DAO voting systems lack privacy — votes are publicly visible and susceptible to social pressure. ShieldVote addresses this with a two-phase **commit-reveal** protocol:
+Most DAO voting systems lack privacy — votes are publicly visible and susceptible to social pressure. ShieldVoteX addresses this with a two-phase **commit-reveal** protocol:
 
 1. **Commit Phase**: Users submit a cryptographic commitment (e.g., hash of vote + salt).
 2. **Reveal Phase** *(optional)*: Users reveal vote + salt to verify the commitment.
@@ -38,7 +38,7 @@ This ensures:
 |------------------->       |-------------------> 
 |                   |       |                   
 +--------v----------+       +--------v----------+
-|   ShieldVote      |       |   ShieldVote      |
+|   ShieldVoteX      |       |   ShieldVoteX      |
 |   Anchor Program  |       |   Anchor Program  |
 |   (Solana Devnet) |       |   (Solana Devnet) |
 +-------------------+       +-------------------+
@@ -68,12 +68,12 @@ anchor test
 
 ## 📁 Project Structure
 ```
-ShieldVote/
+ShieldVoteX/
 ├── cli-version/
 │   └── src/main.rs              # CLI vote simulator
 │
 ├── anchor-version/
-│   └── programs/shieldvote_anchor/
+│   └── programs/ShieldVote_anchor/
 │       └── src/lib.rs           # Anchor smart contract
 │
 ├── Anchor.toml
